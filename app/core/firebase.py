@@ -1,17 +1,19 @@
 import os
 import json
+import base64
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 
 # --------------------------------------------------
-# Load Firebase credentials from ENV (Render-safe)
+# Load Firebase credentials from BASE64 env variable
 # --------------------------------------------------
 
-service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+b64_creds = os.getenv("FIREBASE_SERVICE_ACCOUNT_B64")
 
-if not service_account_json:
-    raise RuntimeError("FIREBASE_SERVICE_ACCOUNT environment variable is not set")
+if not b64_creds:
+    raise RuntimeError("FIREBASE_SERVICE_ACCOUNT_B64 environment variable is not set")
 
+service_account_json = base64.b64decode(b64_creds).decode("utf-8")
 service_account_info = json.loads(service_account_json)
 
 # Initialize Firebase Admin SDK only once
@@ -24,7 +26,4 @@ db = firestore.client()
 
 
 def verify_firebase_token(token: str):
-    """
-    Verify Firebase ID token from frontend
-    """
     return auth.verify_id_token(token)
