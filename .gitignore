@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.*
+
+# Firebase secrets
+firebase-service-account.json
+
+# Virtual env
+venv/
