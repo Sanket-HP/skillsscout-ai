@@ -1,13 +1,23 @@
+import os
+import json
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
-from app.core.config import SERVICE_ACCOUNT_PATH, FIREBASE_PROJECT_ID
 
-# Initialize Firebase only once
+# --------------------------------------------------
+# Load Firebase credentials from ENV (Render-safe)
+# --------------------------------------------------
+
+service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+
+if not service_account_json:
+    raise RuntimeError("FIREBASE_SERVICE_ACCOUNT environment variable is not set")
+
+service_account_info = json.loads(service_account_json)
+
+# Initialize Firebase Admin SDK only once
 if not firebase_admin._apps:
-    cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
-    firebase_admin.initialize_app(cred, {
-        "projectId": FIREBASE_PROJECT_ID
-    })
+    cred = credentials.Certificate(service_account_info)
+    firebase_admin.initialize_app(cred)
 
 # Firestore client
 db = firestore.client()
@@ -17,5 +27,4 @@ def verify_firebase_token(token: str):
     """
     Verify Firebase ID token from frontend
     """
-    decoded_token = auth.verify_id_token(token)
-    return decoded_token
+    return auth.verify_id_token(token)
